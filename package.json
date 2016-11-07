@@ -10,7 +10,17 @@
     "type": "git",
     "url": "git@github-mel:charmingmel/nowshowing-bot.git"
   },
-  "keywords": ["movies", "now showing", "bot"],
+  "keywords": [
+    "movies",
+    "now showing",
+    "bot"
+  ],
   "author": "Mel Michael",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "request": "^2.78.0"
+  }
 }
