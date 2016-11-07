@@ -44,7 +44,9 @@ app.post('/webhook', function (req, res) {
 
     if (event.message && event.message.text) {
       let text = event.message.text
-      let testGeneric = generic.filter(isGenericText);
+      let testGeneric = generic.filter(function(str) {
+        return new RegExp(str, 'i').test(text)
+      });
 
       if (testGeneric.length > 0) {
         sendGenericMessage(sender)
@@ -57,10 +59,6 @@ app.post('/webhook', function (req, res) {
       sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
       continue
     }
-  }
-
-  function isGenericText(str) {
-    return new RegExp(str).test(text);
   }
 
   res.sendStatus(200)
