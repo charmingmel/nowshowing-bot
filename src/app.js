@@ -10,10 +10,8 @@ const app = express()
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
-// Arbitrary value used to validate a webhook
+// Set config values
 const VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN
-
-// Generate a page access token for your page from the App Dashboard
 const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN
 
 if (!(VERIFY_TOKEN && PAGE_ACCESS_TOKEN)) {
@@ -27,7 +25,6 @@ app.get('/', function (req, res) {
 
 // Facebook Verification
 app.get('/webhook', function (req, res) {
-  console.log('Query --->',req.query)
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
     res.send(req.query['hub.challenge'])
   } else {
@@ -39,16 +36,17 @@ app.get('/webhook', function (req, res) {
 // Post message
 app.post('/webhook', function (req, res) {
   let messaging_events = req.body.entry[0].messaging
+  let generic = ['movie', 'now', 'showing', 'movies', 'now showing', 'currently', 'presently']
 
   for (let i = 0; i < messaging_events.length; i++) {
     let event = req.body.entry[0].messaging[i]
     let sender = event.sender.id
-    console.log('<===== Events ===>', event)
-    console.log('<===== sender ===>', sender)
 
     if (event.message && event.message.text) {
       let text = event.message.text
-      if (text === 'now showing') {
+      let testGeneric = generic.filter(isGenericText);
+
+      if (testGeneric.length > 0) {
         sendGenericMessage(sender)
         continue
       }
@@ -60,6 +58,11 @@ app.post('/webhook', function (req, res) {
       continue
     }
   }
+
+  function isGenericText(str) {
+    return new RegExp(str).test(text);
+  }
+
   res.sendStatus(200)
 })
 
@@ -75,9 +78,9 @@ function sendTextMessage(sender, text) {
     }
   }, function(error, response, body) {
     if (error) {
-      console.log('Error sending messages: ', error)
+      console.error('Error sending messages: ', error)
     } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
+      console.error('Error: ', response.body.error)
     }
   })
 }
@@ -124,9 +127,9 @@ function sendGenericMessage(sender) {
     }
   }, function(error, response, body) {
     if (error) {
-      console.log('Error sending messages: ', error)
+      console.error('Error sending messages: ', error)
     } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
+      console.error('Error: ', response.body.error)
     }
   })
 }
