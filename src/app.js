@@ -26,6 +26,114 @@ app.get('/', function (req, res) {
   res.send('hello world i am a movie bot')
 })
 
+// Facebook Verification
+app.get('/webhook', function (req, res) {
+  console.log('Query --->',req.query)
+  if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
+    res.send(req.query['hub.challenge'])
+  } else {
+    console.error("Failed validation. Make sure the validation tokens match.");
+    res.sendStatus(403);
+  }
+})
+
+// Post message
+app.post('/webhook', function (req, res) {
+  let messaging_events = req.body.entry[0].messaging
+  console.log('--=====---======message Events-----=====-=-=-=--=-=-=-=-=', messaging_events);
+
+  for (let i = 0; i < messaging_events.length; i++) {
+    let event = req.body.entry[0].messaging[i]
+    let sender = event.sender.id
+    console.log('<===== Events ===>', event)
+    console.log('<===== sender ===>', sender)
+
+    if (event.message && event.message.text) {
+      let text = event.message.text
+      console.log('Text', text);
+      if (text === 'movies') {
+        sendGenericMessage(sender)
+        continue
+      }
+      sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+    }
+    if (event.postback) {
+      let text = JSON.stringify(event.postback)
+      sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
+      continue
+    }
+  }
+  res.sendStatus(200)
+})
+
+function sendTextMessage(sender, text) {
+  let messageData = {text: text}
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/messages',
+    qs: {access_token: PAGE_ACCESS_TOKEN},
+    method: 'POST',
+    json: {
+      recipient: {id: sender},
+      message: messageData,
+    }
+  }, function(error, response, body) {
+    if (error) {
+      console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    }
+  })
+}
+
+function sendGenericMessage(sender) {
+  let messageData = {
+    "attachment": {
+      "type": "template",
+      "payload": {
+        "template_type": "generic",
+        "elements": [{
+          "title": "Avatar is showing now",
+          "subtitle": "Element #1 of an hscroll",
+          "image_url": "http://images2.fanpop.com/image/photos/12300000/Avatar-avatar-12304477-1280-720.jpg",
+          "buttons": [{
+            "type": "web_url",
+            "url": "http://www.enksoft.com",
+            "title": "Open web page"
+          }, {
+            "type": "postback",
+            "title": "Postback",
+            "payload": "Payload for first element in a generic bubble",
+          }],
+        }, {
+          "title": "Midnight in Paris Las Vegas",
+          "subtitle": "Element #2 of an hscroll",
+          "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/51/The_hotel_Paris_Las_Vegas_as_seen_from_the_hotel_The_Bellagio.jpg",
+          "buttons": [{
+            "type": "postback",
+            "title": "Postback",
+            "payload": "Payload for second element in a generic bubble",
+          }],
+        }]
+      }
+    }
+  }
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/messages',
+    qs: {access_token: PAGE_ACCESS_TOKEN},
+    method: 'POST',
+    json: {
+      recipient: {id: sender},
+      message: messageData,
+    }
+  }, function(error, response, body) {
+    if (error) {
+      console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    }
+  })
+}
+
 app.set('port', process.env.PORT || 7000)
 
 app.listen(app.get('port'), function() {
