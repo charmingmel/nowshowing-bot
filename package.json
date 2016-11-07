@@ -1,0 +1,16 @@
+{
+  "name": "nowshowing-bot",
+  "version": "1.0.0",
+  "description": "Now Showing bot is a bot that provides currently showing movies in different cinemas at the time of the request. This bot will only provide movie details for Nigeria cinemas at the moment.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-mel:charmingmel/nowshowing-bot.git"
+  },
+  "keywords": ["movies", "now showing", "bot"],
+  "author": "Mel Michael",
+  "license": "ISC"
+}
