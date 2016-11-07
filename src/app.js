@@ -40,7 +40,6 @@ app.get('/webhook', function (req, res) {
 // Post message
 app.post('/webhook', function (req, res) {
   let messaging_events = req.body.entry[0].messaging
-  console.log('--=====---======message Events-----=====-=-=-=--=-=-=-=-=', messaging_events);
 
   for (let i = 0; i < messaging_events.length; i++) {
     let event = req.body.entry[0].messaging[i]
@@ -50,8 +49,7 @@ app.post('/webhook', function (req, res) {
 
     if (event.message && event.message.text) {
       let text = event.message.text
-      console.log('Text', text);
-      if (text === 'movies') {
+      if (text === 'now showing') {
         sendGenericMessage(sender)
         continue
       }
